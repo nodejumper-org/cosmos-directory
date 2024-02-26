@@ -314,12 +314,12 @@ function ChainMonitor() {
       const tallyParams = await got.get(restUrl + 'cosmos/gov/v1beta1/params/tallying', gotOpts).json();
       return {
         governance: {
-          voting_period: votingParams.voting_period,
-          min_deposit: depositParams.min_deposit,
-          max_deposit_period: depositParams.max_deposit_period,
-          quorum: tallyParams.quorum,
-          threshold: tallyParams.threshold,
-          veto_threshold: tallyParams.veto_threshold
+          voting_period: votingParams.voting_params.voting_period,
+          min_deposit: depositParams.deposit_params.min_deposit,
+          max_deposit_period: depositParams.deposit_params.max_deposit_period,
+          quorum: tallyParams.tally_params.quorum,
+          threshold: tallyParams.tally_params.threshold,
+          veto_threshold: tallyParams.tally_params.veto_threshold
         }
       }
     } catch (e) { timeStamp(chain.path, 'Gov params check failed', e.message) }
