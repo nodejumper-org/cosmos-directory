@@ -5,7 +5,8 @@ import path from 'path'
 import _ from 'lodash'
 import Bugsnag from "@bugsnag/js"
 import { join } from 'path';
-import { timeStamp } from '../utils.js';
+import { createAgent, timeStamp } from "../utils.js"
+import got from 'got';
 
 function Repository(client, url, branch, opts) {
   opts = opts || {}
@@ -13,6 +14,12 @@ function Repository(client, url, branch, opts) {
   const repoDir = join(process.cwd(), '../' + name)
   const repoPath = join(repoDir, opts.path || '')
   const exclude = opts.exclude || []
+  const agent = createAgent();
+  const gotOpts = {
+    timeout: { request: 5000 },
+    retry: { limit: 3 },
+    agent: agent
+  }
 
   async function updateRepo() {
     if(fs.existsSync(repoDir)) fs.rmSync(repoDir, {recursive: true})
@@ -69,12 +76,24 @@ function Repository(client, url, branch, opts) {
   }
 
   async function loadData() {
+    let supportedDirectories = undefined
+    if (opts.name === 'chain-registry') {
+      let supportedChains = await got.get('https://raw.githubusercontent.com/nodejumper-org/jumper-assets/master/chains.json', gotOpts).json()
+      supportedDirectories = supportedChains
+        .filter(chain => !chain.is_archive)
+        .map(chain => chain.chain_name);
+      console.log('Fetching data from chain-registry. Supported dirs: ', supportedDirectories)
+    }
+
     const directories = fs.readdirSync(repoPath, { withFileTypes: true })
       .filter((item) => item.isDirectory())
       .map((item) => item.name);
 
     const allData = await Promise.all(directories.map(async dir => {
       if (dir.startsWith('.') || exclude.includes(dir)) {
+        return;
+      }
+      if (supportedDirectories && !supportedDirectories.includes(dir)) {
         return;
       }
 

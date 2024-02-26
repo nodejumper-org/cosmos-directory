@@ -36,6 +36,42 @@ const CACHED_REQUESTS = [
   {
     path: new RegExp("cosmos/distribution/v1beta1/delegators/[\\w\\d]*/withdraw_address$"),
     maxAge: 60
+  },
+  {
+    path: 'cosmos/bank/v1beta1/supply',
+    maxAge: 60
+  },
+  {
+    path: new RegExp("cosmos/bank/v1beta1/supply/[\\w\\d]*$"),
+    maxAge: 60
+  },
+  {
+    path: 'cosmos/base/tendermint/v1beta1/node_info',
+    maxAge: 60
+  },
+  {
+    path: 'cosmos/mint/v1beta1/inflation',
+    maxAge: 60
+  },
+  {
+    path: 'cosmos/mint/v1beta1/params',
+    maxAge: 60,
+  },
+  {
+    path: 'cosmos/staking/v1beta1/params',
+    maxAge: 60
+  },
+  {
+    path: '/cosmos/slashing/v1beta1/params',
+    maxAge: 60
+  },
+  {
+    path: '/cosmos/slashing/v1beta1/signing_infos?pagination.limit=10000',
+    maxAge: 60
+  },
+  {
+    path: 'cosmos/distribution/v1beta1/community_pool',
+    maxAge: 60
   }
  ]
 
