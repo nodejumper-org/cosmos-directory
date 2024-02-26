@@ -82,6 +82,7 @@ function ChainMonitor() {
       const blockParams = await getBlockParams(restUrl, chain) || {}, { actualBlocksPerYear } = blockParams
       const stakingParams = await getStakingParams(restUrl, chain) || {}, { bondedTokens } = stakingParams
       const slashingParams = await getSlashingParams(restUrl, chain) || {}
+      const governanceParams = await getGovernanceParams(restUrl, chain) || {}
       let supplyParams = {}
       if (denom) {
         supplyParams = await getSupplyParams(restUrl, chain, bondedTokens) || {}
@@ -96,11 +97,12 @@ function ChainMonitor() {
         ...blockParams,
         ...stakingParams,
         ...slashingParams,
+        ...governanceParams,
         ...supplyParams,
         ...mintParams,
         ...distributionParams,
         ...provisionParams,
-        ...aprParams
+        ...aprParams,
       }
       return _.mapKeys({
         ...data,
@@ -303,6 +305,24 @@ function ChainMonitor() {
         bondedRatio
       }
     } catch (e) { timeStamp(chain.path, 'Supply check failed', e.message) }
+  }
+
+  async function getGovernanceParams(restUrl, chain) {
+    try {
+      const votingParams = await got.get(restUrl + 'cosmos/gov/v1beta1/params/voting', gotOpts).json();
+      const depositParams = await got.get(restUrl + 'cosmos/gov/v1beta1/params/deposit', gotOpts).json();
+      const tallyParams = await got.get(restUrl + 'cosmos/gov/v1beta1/params/tallying', gotOpts).json();
+      return {
+        governance: {
+          voting_period: votingParams.voting_period,
+          min_deposit: depositParams.min_deposit,
+          max_deposit_period: depositParams.max_deposit_period,
+          quorum: tallyParams.quorum,
+          threshold: tallyParams.threshold,
+          veto_threshold: tallyParams.veto_threshold
+        }
+      }
+    } catch (e) { timeStamp(chain.path, 'Gov params check failed', e.message) }
   }
 
   return {
