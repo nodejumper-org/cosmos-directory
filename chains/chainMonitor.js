@@ -132,7 +132,8 @@ function ChainMonitor() {
       const currentBlock = await got.get(`${restUrl}cosmos/base/tendermint/v1beta1/blocks/latest`, gotOpts).json()
       const currentBlockTime = new Date(currentBlock.block.header.time) / 1000
       const currentBlockHeight = currentBlock.block.header.height
-      const prevBlock = await got.get(`${restUrl}cosmos/base/tendermint/v1beta1/blocks/${currentBlockHeight - 100}`, gotOpts).json()
+      const blocksToCompare = process.env.BLOCKS_TO_COMPARE || Math.min(1000, currentBlockHeight - 1)
+      const prevBlock = await got.get(`${restUrl}cosmos/base/tendermint/v1beta1/blocks/${currentBlockHeight - blocksToCompare}`, gotOpts).json()
       const prevBlockTime = new Date(prevBlock.block.header.time) / 1000
       const prevBlockHeight = prevBlock.block.header.height
       const actualBlockTime = (currentBlockTime - prevBlockTime) / (currentBlockHeight - prevBlockHeight)
@@ -266,16 +267,10 @@ function ChainMonitor() {
   async function calculateApr(chain, annualProvision, bondedTokens, communityTax, blocksPerYear, actualBlocksPerYear) {
     const path = chain.path
     try {
-      if (path === 'dydx' && process.env.APYBARA_API_KEY) {
-        const opts = {
-          headers: {
-            'X-ACCESS-KEY': `${process.env.APYBARA_API_KEY}`
-          },
-          ...gotOpts
-        }
-        const aprRequest = await got.get("https://api.protocolstaking.info/v0/protocols/dydx", opts).json();
+      if (path === 'dydx') {
+        const aprRequest = await got.get("https://api.lacertalabs.xyz/data/stakingapr", gotOpts).json();
         return {
-          calculatedApr: aprRequest[0]?.rewardRate
+          calculatedApr: parseFloat(aprRequest['0']?.average_stakingapr)
         }
       } else if (path === 'sifchain') {
         const aprRequest = await got.get("https://data.sifchain.finance/beta/validator/stakingRewards", gotOpts).json();
