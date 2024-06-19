@@ -15,7 +15,7 @@ import BugsnagPluginKoa from "@bugsnag/plugin-koa"
 (async () => {
   const client = await redisClient();
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.APP_PORT || 3000;
   const app = new Koa();
   const subdomain = new Subdomain();
 

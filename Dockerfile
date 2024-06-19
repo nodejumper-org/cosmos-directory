@@ -8,7 +8,7 @@ RUN npm install
 RUN npm install pm2 -g
 COPY . ./
 
-EXPOSE 3000
+EXPOSE $APP_PORT
 
 ENV NODE_ENV=production
 ENV APP_NAME=app
