@@ -40,12 +40,22 @@ import BugsnagPluginKoa from "@bugsnag/plugin-koa"
   const validatorRegistry = ValidatorRegistry(client)
 
   const proxyController = ProxyController(client, chainRegistry)
-  subdomain.use('rest', proxyController.routes('rest'));
-  subdomain.use('rpc', proxyController.routes('rpc'));
+  const restRoutes = proxyController.routes('rest')
+  const rpcRoutes = proxyController.routes('rpc')
+  subdomain.use('rest', restRoutes);
+  subdomain.use('rest.*', restRoutes);
+  subdomain.use('rpc', rpcRoutes);
+  subdomain.use('rpc.*', rpcRoutes);
 
-  subdomain.use('chains', ChainsController(chainRegistry).routes());
-  subdomain.use('validators', ValidatorsController(chainRegistry, validatorRegistry).routes());
-  subdomain.use('status', StatusController(client, chainRegistry).routes());
+  const chainsRoutes = ChainsController(chainRegistry).routes();
+  const validatorsRoutes = ValidatorsController(chainRegistry, validatorRegistry).routes();
+  const statusRoutes = StatusController(client, chainRegistry).routes();
+  subdomain.use('chains', chainsRoutes);
+  subdomain.use('chains.*', chainsRoutes);
+  subdomain.use('validators', validatorsRoutes);
+  subdomain.use('validators.*', validatorsRoutes);
+  subdomain.use('status', statusRoutes);
+  subdomain.use('status.*', statusRoutes);
 
   app.use(subdomain.routes());
 
