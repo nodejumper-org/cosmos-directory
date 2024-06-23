@@ -12,7 +12,7 @@ function JumperRegistryRepository(client, url, branch, opts) {
   const name = 'chain-registry'
   const repoDir = join(process.cwd(), '../' + name)
   const repoPathMainnet = repoDir
-  const repoPathTestnet = join(repoDir, opts.path || '')
+  const repoPathTestnet = join(repoDir, 'testnets')
   const exclude = opts.exclude || []
   const agent = createAgent()
   const gotOpts = {
@@ -48,8 +48,8 @@ function JumperRegistryRepository(client, url, branch, opts) {
   }
 
   function buildData(dir, repoPath) {
-    const jsonFilesTestnet = fs.readdirSync(join(repoPath, dir)).filter(file => path.extname(file) === '.json');
-    const data = jsonFilesTestnet.reduce((sum, filename) => {
+    const jsonFiles = fs.readdirSync(join(repoPath, dir)).filter(file => path.extname(file) === '.json');
+    const data = jsonFiles.reduce((sum, filename) => {
       const path = join(repoPath, dir, filename);
       const data = fs.existsSync(path) ? fs.readFileSync(path) : undefined
       const json = data && JSON.parse(data);

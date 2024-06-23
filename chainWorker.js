@@ -52,7 +52,7 @@ async function queueChainCheck(client, registry, monitor) {
 (async () => {
   const client = await redisClient();
 
-  const chainRepo = JumperRegistryRepository(client, chainUrl, chainBranch, { path: chainPath, exclude: ['_template'], require: 'chain.json' })
+  const chainRepo = JumperRegistryRepository(client, chainUrl, chainBranch, { exclude: ['_template'], require: 'chain.json' })
   const validatorRepo = Repository(client, validatorUrl, validatorBranch, { require: 'chains.json', storeMeta: async (name, allData) => {
     await client.json.set([name, 'addresses'].join(':'), '$', allData.reduce((sum, validator) => {
       for(const chain of validator.chains.chains){
