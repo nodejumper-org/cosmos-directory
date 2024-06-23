@@ -9,7 +9,7 @@ import got from 'got';
 
 function JumperRegistryRepository(client, url, branch, opts) {
   opts = opts || {}
-  const name = 'jumper-registry'
+  const name = 'chain-registry'
   const repoDir = join(process.cwd(), '../' + name)
   const repoPathMainnet = repoDir
   const repoPathTestnet = join(repoDir, opts.path || '')
