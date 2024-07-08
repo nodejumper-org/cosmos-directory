@@ -77,37 +77,27 @@ function JumperRegistryRepository(client, url, branch, opts) {
 
   async function loadData() {
     const supportedChains = await got.get('https://raw.githubusercontent.com/nodejumper-org/jumper-assets/master/chains.json', gotOpts).json()
-    const supportedDirectories = supportedChains
+    const supportedChainNames = supportedChains
       .map(chain => chain.chain_name);
-    console.log('Fetching data from jumper-registry. Supported chain paths: ', supportedDirectories)
+    console.log('Fetching data from jumper-registry. Supported chains: ', supportedChainNames)
 
-    const directoriesMainnet = fs.readdirSync(repoPathMainnet, {withFileTypes: true})
-      .filter((item) => item.isDirectory())
-      .map((item) => item.name);
-
-    const directoriesTestnet = fs.readdirSync(repoPathTestnet, {withFileTypes: true})
-      .filter((item) => item.isDirectory())
-      .map((item) => item.name);
-
-    const directories = [...directoriesMainnet, ...directoriesTestnet];
-
-    const allData = await Promise.all(directories.map(async dir => {
-      if (dir.startsWith('.') || exclude.includes(dir)) {
-        return;
+    const chainPaths = supportedChains.map(chain => {
+      const repoPath = chain.network_type === 'mainnet' ? repoPathMainnet : repoPathTestnet;
+      return {
+        repoPath,
+        chainDir: chain.chain_name
       }
-      if (supportedDirectories && !supportedDirectories.includes(dir)) {
-        return;
-      }
+    })
 
-      const repoPath = directoriesMainnet.includes(dir) ? repoPathMainnet : repoPathTestnet;
-      const path = join(repoPath, dir);
-      if (opts.require && !fs.existsSync(join(path, opts.require))) {
+    const allData = await Promise.all(chainPaths.map(async ({ repoPath, chainDir }) => {
+      const path = join(repoPath, chainDir);
+      if (!fs.existsSync(join(path))) {
+        console.log('Path does not exist:', path)
         return
       }
 
-      const data = buildData(dir, repoPath);
-
-      await client.json.set([name, dir].join(':'), '$', data)
+      const data = buildData(chainDir, repoPath);
+      await client.json.set([name, chainDir].join(':'), '$', data)
 
       return data
     }, {}));
